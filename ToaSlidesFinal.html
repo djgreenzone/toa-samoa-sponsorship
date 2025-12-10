@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toa Samoa: Hyper-Kinetic Vision</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Teko for maximum impact, Rajdhani for tech specs -->
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Teko:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+/* 1. CORE SYSTEM & VARIABLES */
+:root {
+    --void-black: #050505;
+    --carbon-fiber: #0a0a0a;
+    --neon-blue: #2979FF;
+    --neon-red: #FF003C;
+    --acid-yellow: #CCFF00; /* Volt accent for highlights */
+    --hud-dim: rgba(255, 255, 255, 0.15);
+    --font-heading: 'Teko', sans-serif;
+    --font-tech: 'Rajdhani', sans-serif;
+    --ease-snap: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+* { box-sizing: border-box; cursor: none; }
+
+body {
+    background-color: var(--void-black);
+    margin: 0;
+    font-family: var(--font-tech);
+    color: white;
+    overflow-x: hidden;
+    height: 100vh;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+}
+
+/* 1.1 LOADING SCREEN */
+#loader {
+    position: fixed; inset: 0; background: #000; z-index: 10000;
+    display: flex; justify-content: center; align-items: center; flex-direction: column;
+    transition: opacity 0.5s ease-out;
+}
+.loader-text {
+    font-family: var(--font-tech); font-size: 20px; color: var(--neon-blue);
+    margin-bottom: 20px; letter-spacing: 5px;
+}
+.loader-bar {
+    width: 300px; height: 4px; background: #222; position: relative; overflow: hidden;
+}
+.loader-progress {
+    position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: var(--neon-red);
+    animation: loadProgress 2s ease-in-out forwards;
+}
+@keyframes loadProgress { 0% { width: 0%; } 100% { width: 100%; } }
+
+/* GLOBAL TEXTURE (The "Grit") */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.07'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    mix-blend-mode: overlay;
+}
+
+/* Custom Cursor */
+#cursor {
+    position: fixed;
+    top: 0; left: 0;
+    width: 20px; height: 20px;
+    border: 2px solid var(--neon-blue);
+    transform: translate(-50%, -50%) rotate(45deg); /* Diamond shape */
+    pointer-events: none;
+    z-index: 9999;
+    transition: width 0.1s, height 0.1s, background 0.1s;
+    mix-blend-mode: difference;
+}
+#cursor::after {
+    content: ''; position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px;
+    border: 1px dashed rgba(255,255,255,0.5);
+    animation: spin 4s linear infinite;
+}
+#cursor.hovered {
+    width: 60px; height: 60px;
+    background: rgba(41, 121, 255, 0.2);
+    border-color: var(--acid-yellow); /* Changed hover to acid yellow for visibility */
+}
+
+/* Mouse Torch */
+#torch {
+    position: fixed; top: 0; left: 0; width: 1000px; height: 1000px;
+    background: radial-gradient(circle, rgba(41, 121, 255, 0.06) 0%, transparent 60%);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* 2. SLIDE ARCHITECTURE */
+.slide-section {
+    width: 100vw; height: 100vh;
+    scroll-snap-align: start;
+    display: flex; justify-content: center; align-items: center;
+    position: relative;
+    border-bottom: 1px solid #111;
+    overflow: hidden;
+}
+
+.slide-container {
+    width: 1280px; height: 720px;
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column;
+}
+
+/* 3. TACTICAL UI & HUD - ANIMATED GRID */
+.tactical-grid {
+    position: absolute; inset: -50%; pointer-events: none;
+    background-image: 
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), 
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: 0;
+    transform: perspective(500px) rotateX(20deg);
+    animation: gridMove 20s linear infinite;
+    opacity: 0.5;
+}
+@keyframes gridMove {
+    0% { transform: perspective(500px) rotateX(20deg) translateY(0); }
+    100% { transform: perspective(500px) rotateX(20deg) translateY(50px); }
+}
+
+/* 4. TYPOGRAPHY - THE "OREGON" TREATMENT */
+h1, h2, h3 {
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+    line-height: 0.85;
+    margin: 0;
+    color: white;
+    font-style: italic; /* Speed */
+    transform: skewX(-10deg); /* More Speed */
+}
+
+h1 { font-size: 220px; letter-spacing: -5px; position: relative; }
+h2 { font-size: 110px; letter-spacing: -2px; }
+h3 { font-size: 48px; letter-spacing: 1px; }
+
+/* Ghost Text (Background Duplicates) */
+.ghost-text {
+    position: absolute;
+    top: -40px; left: -20px;
+    font-size: 1.5em;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(255,255,255,0.05);
+    z-index: -1;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.sub-tech {
+    font-family: var(--font-tech);
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--neon-blue);
+    font-size: 14px;
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 15px;
+    background: rgba(41, 121, 255, 0.1);
+    padding: 5px 10px;
+    width: fit-content;
+    border-left: 2px solid var(--neon-blue);
+}
+
+/* 5. INTERACTIVE CARDS (SHARDS) */
+.shard-container {
+    background: rgba(10, 10, 12, 0.9);
+    /* Aggressive Oregon "Wing" Cut */
+    clip-path: polygon(30px 0, 100% 0, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0 100%, 0 30px);
+    border-left: 6px solid var(--neon-red);
+    padding: 40px;
+    position: relative;
+    height: 100%;
+    display: flex; flex-direction: column;
+    transform-style: preserve-3d;
+    transition: transform 0.1s ease-out;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    /* Scanline overlay */
+    background-image: repeating-linear-gradient(transparent, transparent 2px, rgba(0,0,0,0.5) 3px);
+}
+
+/* Add "Tech" details to cards */
+.shard-container::before {
+    content: "/// SECURE DATA";
+    position: absolute; bottom: 10px; right: 10px;
+    font-size: 10px; color: #444; letter-spacing: 2px;
+}
+.shard-container::after {
+    content: "";
+    position: absolute; top: 0; right: 0;
+    width: 20px; height: 20px;
+    background: linear-gradient(45deg, transparent 50%, var(--acid-yellow) 50%); /* Pop of Acid Yellow */
+}
+
+/* 6. ANIMATIONS */
+.reveal-up {
+    opacity: 0; transform: translateY(100px) skewX(-10deg);
+    transition: all 0.8s var(--ease-snap);
+}
+.active-slide .reveal-up { opacity: 1; transform: translateY(0) skewX(-10deg); }
+
+/* Stagger delays */
+.d-1 { transition-delay: 0.05s; }
+.d-2 { transition-delay: 0.1s; }
+.d-3 { transition-delay: 0.15s; }
+.d-4 { transition-delay: 0.2s; }
+
+/* 7. DATA VIZ */
+.data-bar-fill {
+    height: 12px;
+    background: var(--neon-blue);
+    width: 0%;
+    transition: width 1.5s var(--ease-snap);
+    transform: skewX(-20deg);
+    background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(0,0,0,0.2) 5px, rgba(0,0,0,0.2) 10px);
+}
+.active-slide .data-bar-fill.fill-trigger { width: var(--target-width); }
+
+/* 8. TACTICAL NAVIGATION */
+#nav-rail {
+    position: fixed; right: 40px; top: 50%; transform: translateY(-50%); z-index: 100;
+    display: flex; flex-direction: column; gap: 10px; align-items: flex-end;
+}
+.nav-item {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-tech); font-size: 12px; color: #666;
+    cursor: pointer; transition: all 0.3s;
+}
+.nav-dash {
+    width: 20px; height: 2px; background: #333; transition: all 0.3s;
+}
+.nav-item:hover .nav-dash { background: var(--neon-blue); width: 30px; }
+.nav-item.active { color: var(--acid-yellow); }
+.nav-item.active .nav-dash { background: var(--neon-red); width: 40px; height: 4px; box-shadow: 0 0 10px var(--neon-red); }
+
+/* 9. DECORATIVE ELEMENTS */
+.barcode {
+    height: 30px; width: 100%;
+    background: repeating-linear-gradient(90deg, #333, #333 2px, transparent 2px, transparent 4px);
+    margin-top: auto; opacity: 0.5;
+}
+
+/* 10. UTILS */
+.grid-2 { display: grid; grid-template-columns: 1fr 1.2fr; gap: 80px; height: 100%; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; height: 100%; }
+.hero-image { 
+    width: 100%; height: 100%; object-fit: cover; 
+    clip-path: polygon(20% 0, 100% 0, 100% 100%, 0% 100%); 
+    filter: grayscale(100%) contrast(1.2) brightness(0.9); 
+    transition: 0.5s; 
+}
+.hero-image:hover { filter: grayscale(0%); clip-path: polygon(10% 0, 100% 0, 100% 100%, 10% 100%); }
+
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* Glitch Text Effect */
+.glitch-hover { position: relative; transition: color 0.3s; }
+.glitch-hover:hover { animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite; color: var(--neon-blue); }
+@keyframes glitch {
+  0% { transform: translate(0) skewX(-10deg); }
+  20% { transform: translate(-2px, 2px) skewX(-10deg); }
+  40% { transform: translate(-2px, -2px) skewX(-10deg); }
+  60% { transform: translate(2px, 2px) skewX(-10deg); }
+  80% { transform: translate(2px, -2px) skewX(-10deg); }
+  100% { transform: translate(0) skewX(-10deg); }
+}
+
+    </style>
+</head>
+<body>
+
+<div id="loader">
+    <div class="loader-text">INITIALIZING VISION 2026...</div>
+    <div class="loader-bar"><div class="loader-progress"></div></div>
+</div>
+
+<div id="cursor"></div>
+<div id="torch"></div>
+<div id="nav-rail">
+    <!-- Generated via JS -->
+</div>
+
+<!-- SLIDE 1: COVER -->
+<section class="slide-section" id="s1">
+    <div class="tactical-grid"></div>
+    <!-- Speed Lines Overlay -->
+    <div style="position:absolute; inset:0; background: repeating-linear-gradient(90deg, transparent, transparent 100px, rgba(255,255,255,0.01) 100px, rgba(255,255,255,0.01) 101px); z-index:1; pointer-events:none;"></div>
+    
+    <div class="slide-container">
+        <div style="position: absolute; top: 0; right: -100px; width: 70%; height: 100%; z-index: 0; transform: skewX(-10deg);">
+            <img src="http://googleusercontent.com/image_collection/image_retrieval/13416764653113665767" style="width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); opacity: 0.6; mask-image: linear-gradient(to right, transparent, black);">
+            <div style="position: absolute; inset: 0; background: linear-gradient(45deg, rgba(41, 121, 255, 0.4), rgba(255,0,60,0.2)); mix-blend-mode: overlay;"></div>
+        </div>
+        
+        <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: center; padding-left: 60px;">
+            <div class="sub-tech reveal-up d-1">Vision // 2026 // CLASSIFIED</div>
+            <h1 class="reveal-up d-2">TOA<br><span style="color: var(--neon-red); text-shadow: 0 0 40px var(--neon-red);">SAMOA</span><div class="ghost-text">TOA SAMOA</div></h1>
+            
+            <div style="display:flex; align-items:center; gap:20px; margin: 40px 0;">
+                <div style="width: 100px; height: 8px; background: var(--neon-blue); transform: skewX(-30deg);" class="reveal-up d-3"></div>
+                <div style="width: 40px; height: 8px; background: var(--acid-yellow); transform: skewX(-30deg);" class="reveal-up d-3"></div>
+            </div>
+            
+            <p class="reveal-up d-4" style="color: white; font-size: 32px; font-weight:700; transform: skewX(-10deg);">HYPER-KINETIC EXCELLENCE.</p>
+            
+            <div class="reveal-up d-4" style="margin-top: 60px; font-family: var(--font-tech); color: #666; font-size: 16px; border: 1px solid #333; padding: 10px; width: fit-content; background: rgba(0,0,0,0.8);">
+                COORD: 13.7590° S, 172.1046° W <span style="color:var(--acid-yellow)">///</span> STATUS: ACTIVE
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 2: LEGACY -->
+<section class="slide-section" id="s2">
+    <div class="tactical-grid"></div>
+    <div class="slide-container">
+        <div class="grid-2">
+            <div style="padding: 60px; display: flex; flex-direction: column; justify-content: center;">
+                <div class="sub-tech reveal-up d-1">01 // Protocol</div>
+                <h2 class="reveal-up d-2">LEGACY<br>SYSTEM<div class="ghost-text">LEGACY</div></h2>
+                
+                <div class="shard-container reveal-up d-3 tilt-card" style="margin-top: 40px; height: auto;">
+                    <h3>WORLD CUP FINALISTS</h3>
+                    <p style="color: #ccc; transform: skewX(-10deg);">Breaking the Tier 1 monopoly. The first Pacific nation to ascend to the final stage.</p>
+                    <div style="margin-top: 20px; border-top: 1px solid #333; padding-top: 20px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-family:var(--font-tech); font-size:18px;">
+                            <span>VICTORY VS ENGLAND</span>
+                            <span style="color:var(--neon-blue)">27-26</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-family:var(--font-tech); font-size:18px;">
+                            <span>GLOBAL VIEWERSHIP</span>
+                            <span style="color:var(--acid-yellow)">RECORD BROKEN</span>
+                        </div>
+                    </div>
+                    <div class="barcode"></div>
+                </div>
+            </div>
+            <div style="position: relative;">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/16662056938756076648" class="hero-image reveal-up d-2" alt="Legacy">
+                <div style="position: absolute; bottom: 40px; right: -20px; background: var(--neon-red); padding: 10px 30px; font-weight: 700; transform: skewX(-20deg); font-family: var(--font-heading); font-size: 30px; color: black;">
+                    EST. 1986
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 3: IDENTITY -->
+<section class="slide-section" id="s3">
+    <div class="tactical-grid"></div>
+    <div class="slide-container">
+        <div style="padding: 60px 80px; display: flex; flex-direction: column; height: 100%; justify-content: center; align-items: center; text-align: center;">
+            <h2 class="reveal-up d-1" style="font-size: 160px;">THE 685<br><span style="color: var(--neon-blue);">MOVEMENT</span></h2>
+            <div class="grid-3" style="width: 100%; height: 300px; margin-top: 60px;">
+                <div class="shard-container reveal-up d-2 tilt-card" style="justify-content: center; align-items: center;">
+                    <i class="fa-solid fa-crown" style="font-size: 40px; color: white; margin-bottom: 20px;"></i>
+                    <h3>PRIDE</h3>
+                    <p style="font-size: 16px; margin: 0; color: #aaa; transform: skewX(-10deg);">ANCESTRAL DNA</p>
+                </div>
+                <div class="shard-container reveal-up d-3 tilt-card" style="justify-content: center; align-items: center; border-left-color: var(--neon-blue);">
+                    <i class="fa-solid fa-bolt" style="font-size: 40px; color: var(--neon-blue); margin-bottom: 20px;"></i>
+                    <h3>POWER</h3>
+                    <p style="font-size: 16px; margin: 0; color: #aaa; transform: skewX(-10deg);">RAW KINETIC ENERGY</p>
+                </div>
+                <div class="shard-container reveal-up d-4 tilt-card" style="justify-content: center; align-items: center; border-left-color: white;">
+                    <i class="fa-solid fa-heart" style="font-size: 40px; color: var(--neon-red); margin-bottom: 20px;"></i>
+                    <h3>PASSION</h3>
+                    <p style="font-size: 16px; margin: 0; color: #aaa; transform: skewX(-10deg);">GLOBAL FAMILY</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 4: ROSTER -->
+<section class="slide-section" id="s4">
+    <div class="tactical-grid"></div>
+    <div class="slide-container">
+        <div style="position: absolute; inset: 0;">
+            <img src="http://googleusercontent.com/image_collection/image_retrieval/14254053808553688284" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.3; filter: grayscale(100%);">
+            <div style="position: absolute; inset: 0; background: linear-gradient(to top, var(--void-black) 20%, transparent 90%);"></div>
+        </div>
+        <div style="position: relative; z-index: 2; padding: 60px 80px; height: 100%; display: flex; flex-direction: column; justify-content: flex-end;">
+            <div class="sub-tech reveal-up d-1">02 // Roster</div>
+            <h2 class="reveal-up d-2" style="font-size: 140px; -webkit-text-stroke: 2px white; color: transparent;">ELITE<span style="color: var(--neon-blue); -webkit-text-stroke: 0;">UNIT</span></h2>
+            
+            <div class="grid-3" style="height: 250px; margin-top: 20px;">
+                <div class="shard-container reveal-up d-3 tilt-card">
+                    <h3 style="font-size: 40px; color: var(--neon-red);">BROTHERHOOD</h3>
+                    <p style="transform: skewX(-10deg);">"Fa'a Samoa" > Everything. The culture is the strategy.</p>
+                </div>
+                <div class="shard-container reveal-up d-4 tilt-card" style="border-left-color: var(--neon-blue);">
+                    <h3 style="font-size: 40px; color: var(--neon-blue);">TALENT</h3>
+                    <p style="transform: skewX(-10deg);">100% of Squad from Top-Tier NRL & Super League.</p>
+                </div>
+                <div class="shard-container reveal-up d-3 tilt-card" style="border-left-color: var(--acid-yellow);">
+                    <h3 style="font-size: 40px; color: white;">SACRIFICE</h3>
+                    <p style="transform: skewX(-10deg);">Players taking 90% pay cuts to represent heritage.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 5: VISUAL BREAK -->
+<section class="slide-section" id="s5">
+    <div class="slide-container">
+        <div style="position: absolute; inset: 0;">
+            <img src="http://googleusercontent.com/image_collection/image_retrieval/13094085762323843548" style="width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) contrast(1.5);">
+            <div style="position: absolute; inset: 0; background: rgba(41, 121, 255, 0.2); mix-blend-mode: multiply;"></div>
+        </div>
+        <div style="position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; height: 100%;">
+            <h2 class="reveal-up d-1" style="font-size: 250px; letter-spacing: 20px; color: transparent; -webkit-text-stroke: 4px white; transform: skewX(-20deg);">SIVA TAU</h2>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 6: FAN CULTURE -->
+<section class="slide-section" id="s6">
+    <div class="tactical-grid"></div>
+    <div class="slide-container">
+        <div class="grid-2">
+            <div style="padding: 60px; display: flex; flex-direction: column; justify-content: center;">
+                <div class="sub-tech reveal-up d-1">03 // Community</div>
+                <h2 class="reveal-up d-2">SEA OF<br><span style="color: var(--neon-blue);">BLUE</span> & <span style="color: var(--neon-red);">RED</span></h2>
+                <div class="shard-container reveal-up d-3 tilt-card" style="margin-top: 40px; height: auto;">
+                    <p style="font-size: 22px; color: white; margin: 0; transform: skewX(-10deg);">A global phenomenon.</p>
+                    <ul style="transform: skewX(-10deg); margin-top: 20px;">
+                        <li style="margin-bottom: 15px;"><strong style="color:var(--neon-blue)">APIA:</strong> National gridlock for 24 hours.</li>
+                        <li style="margin-bottom: 15px;"><strong style="color:var(--neon-red)">SOUTH AUCKLAND:</strong> The diaspora heartland.</li>
+                        <li style="margin-bottom: 15px;"><strong style="color:white">WESTERN SYDNEY:</strong> 50,000+ street parades.</li>
+                    </ul>
+                </div>
+            </div>
+            <div style="position: relative;">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/14526878052120624694" class="hero-image reveal-up d-2" alt="Fans">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 7: SECTION 2 -->
+<section class="slide-section" id="s7">
+    <div class="tactical-grid"></div>
+    <div class="slide-container">
+        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; background: repeating-linear-gradient(45deg, #0a0a0a, #0a0a0a 10px, #111 10px, #111 20px);">
+            <div class="sub-tech reveal-up d-1" style="font-size: 24px; margin-bottom: 20px;">Section 02</div>
+            <h2 class="reveal-up d-2" style="font-size: 140px; color: var(--neon-blue);">DIGITAL<br>INTELLIGENCE</h2>
+            <div style="width: 150px; height: 6px; background: var(--acid-yellow); margin-top: 40px; transform: skewX(-30deg);" class="reveal-up d-3"></div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 8: METRICS -->
+<section class="slide-section" id="s8">
+    <div class="tactical-grid"></div>
+    <div class="slide-container">
+        <div style="padding: 60px 80px; height: 100%; display: flex; flex-direction: column;">
+            <div style="text-align: center; margin-bottom: 40px;">
+                <h2 class="reveal-up d-1">PERFORMANCE <span style="color: var(--neon-red);">METRICS</span></h2>
+            </div>
+            <div class="grid-3" style="align-items: center;">
+                <div class="shard-container reveal-up d-2 tilt-card" style="text-align: center; justify-content: center; height: 300px;">
+                    <div class="stat-mega counter" data-target="650" data-suffix="K" style="font-size: 140px; color:white;">0</div>
+                    <div style="color: var(--neon-blue); font-size: 30px; font-weight: 700; transform: skewX(-10deg);">TOTAL REACH</div>
+                    <div style="font-size: 16px; color: #666; transform: skewX(-10deg);">+45% YOY</div>
+                </div>
+                <div class="shard-container reveal-up d-3 tilt-card" style="text-align: center; justify-content: center; height: 350px; background: #111; border: 2px solid var(--neon-blue);">
+                    <div class="stat-mega counter" data-target="2.5" data-suffix="M" style="color: var(--neon-blue); font-size: 160px;">0</div>
+                    <div style="color: white; font-size: 34px; font-weight: 700; transform: skewX(-10deg);">VIDEO VIEWS</div>
+                    <div style="font-size: 16px; color: #888; transform: skewX(-10deg);">TIKTOK & REELS</div>
+                </div>
+                <div class="shard-container reveal-up d-4 tilt-card" style="text-align: center; justify-content: center; height: 300px; border-left-color: white;">
+                    <div class="stat-mega counter" data-target="8.5" data-suffix="%" style="font-size: 140px; color:var(--neon-red);">0</div>
+                    <div style="color: white; font-size: 30px; font-weight: 700; transform: skewX(-10deg);">ENGAGEMENT</div>
+                    <div style="font-size: 16px; color: #666; transform: skewX(-10deg);">2X INDUSTRY AVG</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 9: SOCIAL MATRIX -->
+<section class="slide-section" id="s9">
+    <div class="tactical-grid"></div>
+    <div class="slide-container">
+        <div class="grid-2">
+            <div style="padding: 60px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid #222;">
+                <div class="sub-tech reveal-up d-1">04 // Channels</div>
+                <h2 class="reveal-up d-2" style="font-size: 90px;">SOCIAL<br>MATRIX</h2>
+                <div class="shard-container reveal-up d-3" style="margin-top: 30px; border: none; background: transparent; padding: 0;">
+                    <p style="font-size: 20px; color: white; transform: skewX(-10deg);">"Facebook retains the core community. TikTok recruits the next generation."</p>
+                </div>
+            </div>
+            <div style="padding: 60px; display: flex; flex-direction: column; justify-content: center;">
+                <!-- Bars -->
+                <div style="margin-bottom: 30px;">
+                    <div style="display:flex; justify-content:space-between; font-weight:700; font-size: 24px; transform: skewX(-10deg);"><span>FB</span><span style="color:var(--neon-blue)">350K</span></div>
+                    <div style="height:12px; background:#222; margin-top:5px; transform: skewX(-20deg);"><div class="data-bar-fill fill-trigger" style="--target-width: 85%;"></div></div>
+                </div>
+                <div style="margin-bottom: 30px;">
+                    <div style="display:flex; justify-content:space-between; font-weight:700; font-size: 24px; transform: skewX(-10deg);"><span>IG</span><span style="color:var(--neon-red)">220K</span></div>
+                    <div style="height:12px; background:#222; margin-top:5px; transform: skewX(-20deg);"><div class="data-bar-fill fill-trigger" style="--target-width: 60%; background:var(--neon-red);"></div></div>
+                </div>
+                <div style="margin-bottom: 30px;">
+                    <div style="display:flex; justify-content:space-between; font-weight:700; font-size: 24px; transform: skewX(-10deg);"><span>TIKTOK</span><span style="color:white">150K</span></div>
+                    <div style="height:12px; background:#222; margin-top:5px; transform: skewX(-20deg);"><div class="data-bar-fill fill-trigger" style="--target-width: 45%; background:white;"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 10: TIKTOK -->
+<section class="slide-section" id="s10">
+    <div class="tactical-grid"></div>
+    <div class="slide-container">
+        <div style="display: flex; height: 100%; align-items: center; justify-content: center; background: radial-gradient(circle at center, #111, black);">
+            <i class="fa-brands fa-tiktok reveal-up d-1" style="font-size: 400px; color: #151515; position: absolute; z-index: 0; transform: skewX(-10deg);"></i>
+            <div style="position: relative; z-index: 2; text-align: center;">
+                <div class="sub-tech" style="justify-content: center;">Insight // Growth</div>
+                <h2 class="reveal-up d-2" style="font-size: 140px;">TIKTOK <span style="color: white;">SURGE</span></h2>
+                <div class="stat-mega reveal-up d-3" style="font-size: 180px; color: var(--neon-blue); text-shadow: 0 0 30px var(--neon-blue); transform: skewX(-10deg);">+120%</div>
+                <p class="reveal-up d-4" style="color: white; font-size: 30px; font-weight:700; transform: skewX(-10deg);">YEAR ON YEAR GROWTH</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 11: YOUTUBE -->
+<section class="slide-section" id="s11">
+    <div class="tactical-grid"></div>
+    <div class="slide-container">
+        <div style="padding: 60px 80px; height: 100%; display: flex; align-items: center;">
+            <div style="flex: 1; padding-right: 60px;">
+                 <i class="fa-brands fa-youtube reveal-up d-1" style="font-size: 100px; color: var(--neon-red); margin-bottom: 20px;"></i>
+                 <h2 class="reveal-up d-2" style="font-size: 100px;">YOUTUBE<br>INTEL</h2>
+                 <div class="shard-container reveal-up d-3 tilt-card" style="margin-top: 40px; border: 1px solid #333; background: transparent; border-left: 4px solid var(--neon-blue); height: auto;">
+                     <h3 style="font-size: 30px; color: white;">TOP PERFORMER</h3>
+                     <p style="margin: 0; color: #ccc; font-size: 20px; transform: skewX(-10deg);">"World Cup Semi-Final Highlights" - 800K Views.</p>
+                 </div>
+            </div>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 30px;">
+                <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 40px; border-bottom: 1px solid #333; padding-bottom: 10px; transform: skewX(-10deg);" class="reveal-up d-2"><span style="color:white">25K+</span><span style="color:#666">SUBS</span></div>
+                <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 40px; border-bottom: 1px solid #333; padding-bottom: 10px; transform: skewX(-10deg);" class="reveal-up d-3"><span style="color:white">1.2M</span><span style="color:#666">VIEWS</span></div>
+                <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 40px; border-bottom: 1px solid #333; padding-bottom: 10px; transform: skewX(-10deg);" class="reveal-up d-4"><span style="color:white">45K</span><span style="color:#666">HOURS</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 12: WEB TRAFFIC -->
+<section class="slide-section" id="s12">
+    <div class="tactical-grid"></div>
+    <div class="slide-container">
+        <div style="padding: 60px 80px; display: flex; flex-direction: column; height: 100%; justify-content: center;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px;">
+                <div><div class="sub-tech">07 // Web Data</div><h2>TRAFFIC <span style="color: var(--neon-blue);">VECTORS</span></h2></div>
+                <div class="shard-container tilt-card" style="padding: 20px; height: auto;"><span style="color: var(--neon-red); font-weight: 700; font-size: 30px; transform: skewX(-10deg);">+400% SURGE (OCT)</span></div>
+            </div>
+            <div class="reveal-up d-2" style="width: 100%; height: 400px; position: relative; border-bottom: 1px solid #333; border-left: 1px solid #333;">
+                <svg viewBox="0 0 1000 400" style="width: 100%; height: 100%; overflow: visible;">
+                    <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:var(--neon-blue);stop-opacity:0.5" /><stop offset="100%" style="stop-color:var(--neon-blue);stop-opacity:0" /></linearGradient>
+                    <path d="M0,350 L200,330 L400,340 L600,100 L800,150 L1000,350" fill="none" stroke="var(--neon-blue)" stroke-width="8" />
+                    <path d="M0,350 L200,330 L400,340 L600,100 L800,150 L1000,350 L1000,400 L0,400 Z" fill="url(#grad1)" style="opacity: 0.5; stroke: none;" />
+                    <circle cx="600" cy="100" r="15" fill="white" stroke="var(--neon-blue)" stroke-width="4" />
+                    <text x="600" y="60" fill="white" font-family="var(--font-heading)" font-size="30" text-anchor="middle" style="text-transform: uppercase;">OCTOBER: INTL WINDOW</text>
+                </svg>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 13: DEMOGRAPHICS -->
+<section class="slide-section" id="s13">
+    <div class="tactical-grid"></div>
+    <div class="slide-container">
+        <div style="padding: 60px 80px; display: flex; align-items: center; height: 100%;">
+            <div style="flex: 1; position: relative; height: 400px; display: flex; align-items: center; justify-content: center;">
+                <div style="position: absolute; width: 350px; height: 350px; border: 4px solid #333; border-radius: 50%;"></div>
+                <div style="position: absolute; width: 250px; height: 250px; border: 2px dashed var(--neon-blue); border-radius: 50%; animation: spin 10s linear infinite;"></div>
+                <div class="stat-mega" style="font-size: 80px; z-index: 2; transform: skewX(-10deg);">GLOBAL</div>
+            </div>
+            <div style="flex: 1; padding-left: 60px;">
+                 <div class="sub-tech">08 // Targeting</div>
+                 <h2 style="font-size: 100px;">GLOBAL<br>REACH</h2>
+                 <div style="margin-top: 40px; display: flex; flex-direction: column; gap: 20px;">
+                     <div class="shard-container reveal-up d-1 tilt-card" style="padding: 20px; border-left: 4px solid var(--neon-blue); display: flex; justify-content: space-between; align-items: center; height: auto;"><span style="font-size: 40px; font-family: var(--font-heading);">AUS & NZ</span><span style="font-size: 30px; color: var(--neon-blue);">45%</span></div>
+                     <div class="shard-container reveal-up d-2 tilt-card" style="padding: 20px; border-left: 4px solid var(--neon-red); display: flex; justify-content: space-between; align-items: center; height: auto;"><span style="font-size: 40px; font-family: var(--font-heading);">SAMOA</span><span style="font-size: 30px; color: var(--neon-red);">25%</span></div>
+                 </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 14: CONTENT PILLARS -->
+<section class="slide-section" id="s14">
+    <div class="tactical-grid"></div>
+    <div class="slide-container">
+        <div style="padding: 60px 80px; height: 100%;">
+            <div class="sub-tech">03 // Content</div>
+            <h2>MEDIA <span style="color: var(--neon-blue);">PILLARS</span></h2>
+            <div class="grid-3" style="height: 400px; margin-top: 40px;">
+                <div class="shard-container reveal-up d-1 tilt-card" style="padding: 0; border: none; overflow: hidden;">
+                    <img src="http://googleusercontent.com/image_collection/image_retrieval/4699085408934990185" style="width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%);">
+                    <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 30px; background: linear-gradient(to top, black, transparent);">
+                        <h3 style="font-size: 50px; margin: 0; color: var(--neon-red);">ON-FIELD</h3>
+                        <p style="font-size: 18px; margin: 0; color: white; transform: skewX(-10deg);">High-Octane Highlights</p>
+                    </div>
+                </div>
+                <div class="shard-container reveal-up d-2 tilt-card" style="padding: 0; border: none; overflow: hidden;">
+                    <img src="http://googleusercontent.com/image_collection/image_retrieval/14526878052120624694" style="width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%);">
+                    <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 30px; background: linear-gradient(to top, black, transparent);">
+                        <h3 style="font-size: 50px; margin: 0; color: var(--neon-blue);">CULTURE</h3>
+                        <p style="font-size: 18px; margin: 0; color: white; transform: skewX(-10deg);">Fan Phenomenon</p>
+                    </div>
+                </div>
+                <div class="shard-container reveal-up d-3 tilt-card" style="padding: 0; border: none; overflow: hidden;">
+                    <img src="http://googleusercontent.com/image_collection/image_retrieval/8435484716107973425" style="width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%);">
+                    <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 30px; background: linear-gradient(to top, black, transparent);">
+                        <h3 style="font-size: 50px; margin: 0; color: white;">ACCESS</h3>
+                        <p style="font-size: 18px; margin: 0; color: white; transform: skewX(-10deg);">Camp Diaries</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 15: SECTION 3 -->
+<section class="slide-section" id="s15">
+    <div class="tactical-grid"></div>
+    <div class="slide-container">
+        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; background: repeating-linear-gradient(-45deg, #050505, #050505 10px, #111 10px, #111 20px);">
+            <div class="sub-tech reveal-up d-1" style="font-size: 24px; margin-bottom: 20px;">Section 03</div>
+            <h2 class="reveal-up d-2" style="font-size: 140px; color: var(--neon-red);">COMMERCIAL<br>VISION</h2>
+            <div class="reveal-up d-3" style="width: 100px; height: 6px; background: white; margin-top: 40px; box-shadow: 0 0 20px white; transform: skewX(-30deg);"></div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 16: REVENUE -->
+<section class="slide-section" id="s16">
+    <div class="tactical-grid"></div>
+    <div class="slide-container">
+        <div style="padding: 60px 80px; height: 100%;">
+            <div class="sub-tech">09 // Expansion</div>
+            <h2>FUTURE <span style="color: var(--neon-blue);">REVENUE</span></h2>
+            <div class="grid-2" style="margin-top: 40px; gap: 40px;">
+                <div class="shard-container reveal-up d-1 tilt-card" style="justify-content: center; height: 350px; border-left: 6px solid var(--neon-blue);">
+                    <i class="fa-solid fa-id-card" style="font-size: 60px; color: var(--neon-blue); margin-bottom: 20px;"></i>
+                    <h3 style="font-size: 60px; margin: 0;">MEMBERSHIP</h3>
+                    <p style="color: #999; margin-top: 10px; transform: skewX(-10deg);">Recurring revenue offering exclusive content and fan benefits.</p>
+                </div>
+                <div class="shard-container reveal-up d-2 tilt-card" style="justify-content: center; height: 350px; border-left: 6px solid var(--neon-red);">
+                    <i class="fa-solid fa-cart-shopping" style="font-size: 60px; color: var(--neon-red); margin-bottom: 20px;"></i>
+                    <h3 style="font-size: 60px; margin: 0;">E-COMMERCE</h3>
+                    <p style="color: #999; margin-top: 10px; transform: skewX(-10deg);">Direct-to-consumer merch drops integrated via social.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 17: PARTNERSHIPS -->
+<section class="slide-section" id="s17">
+    <div class="tactical-grid"></div>
+    <div class="slide-container">
+        <div style="padding: 60px 80px; height: 100%;">
+            <h2 style="font-size: 100px;">PARTNERSHIP <span style="color: var(--neon-blue);">ASSETS</span></h2>
+            <div class="grid-3" style="margin-top: 60px; height: 350px;">
+                <div class="shard-container reveal-up d-1 tilt-card" style="background: #111;">
+                    <div style="font-size: 120px; color: #222; font-family: var(--font-heading); font-weight: 700; position: absolute; top: 0; right: 20px;">01</div>
+                    <h3 style="color: var(--neon-blue); font-size: 60px; margin-top: 40px;">JERSEY</h3>
+                    <p style="transform: skewX(-10deg);">Prime real estate on the international stage.</p>
+                </div>
+                <div class="shard-container reveal-up d-2 tilt-card" style="background: #111; border-left-color: var(--neon-blue);">
+                    <div style="font-size: 120px; color: #222; font-family: var(--font-heading); font-weight: 700; position: absolute; top: 0; right: 20px;">02</div>
+                    <h3 style="color: white; font-size: 60px; margin-top: 40px;">DIGITAL</h3>
+                    <p style="transform: skewX(-10deg);">Branded content series & social media takeovers.</p>
+                </div>
+                <div class="shard-container reveal-up d-3 tilt-card" style="background: #111; border-left-color: white;">
+                    <div style="font-size: 120px; color: #222; font-family: var(--font-heading); font-weight: 700; position: absolute; top: 0; right: 20px;">03</div>
+                    <h3 style="color: var(--neon-red); font-size: 60px; margin-top: 40px;">COMMUNITY</h3>
+                    <p style="transform: skewX(-10deg);">Grassroots activations and CSR programs.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 18: ROADMAP -->
+<section class="slide-section" id="s18">
+    <div class="tactical-grid"></div>
+    <div class="slide-container">
+        <div style="padding: 60px 80px; height: 100%;">
+            <div class="sub-tech">10 // Roadmap</div>
+            <h2>VISION <span style="color: white;">2026</span></h2>
+            <div style="display: flex; gap: 20px; margin-top: 60px; height: 300px;">
+                 <div class="shard-container reveal-up d-1 tilt-card" style="flex: 1; border-left: 1px solid #333; border-top: 4px solid var(--neon-blue); padding-top: 20px;">
+                     <h3 style="font-size: 40px;">2024</h3>
+                     <p style="font-size: 18px; color: white; transform: skewX(-10deg);">Consolidate Digital.</p>
+                 </div>
+                 <div class="shard-container reveal-up d-2 tilt-card" style="flex: 1; border-left: 1px solid #333; border-top: 4px solid white; padding-top: 20px;">
+                     <h3 style="font-size: 40px;">2025</h3>
+                     <p style="font-size: 18px; color: white; transform: skewX(-10deg);">Global Commercial Growth.</p>
+                 </div>
+                 <div class="shard-container reveal-up d-3 tilt-card" style="flex: 1; border-left: 1px solid #333; border-top: 4px solid var(--neon-red); padding-top: 20px; background: #111;">
+                     <h3 style="font-size: 40px;">2026</h3>
+                     <p style="font-size: 18px; color: white; transform: skewX(-10deg);">WORLD CUP VICTORY.</p>
+                 </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 19: CTA -->
+<section class="slide-section" id="s19">
+    <div class="slide-container">
+        <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(to top, var(--neon-blue) 0%, transparent 100%); opacity: 0.1;"></div>
+        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; text-align: center; z-index: 2;">
+            <h2 class="reveal-up d-1" style="font-size: 160px; line-height: 0.8; letter-spacing: -5px;">JOIN THE<br><span style="color: transparent; -webkit-text-stroke: 4px white;">LEGACY</span></h2>
+            <div style="margin-top: 60px; display: flex; gap: 40px;">
+                <div class="shard-container reveal-up d-2 tilt-card" style="background: var(--neon-blue); border: none; padding: 20px 60px; color: black; font-family: var(--font-tech); font-weight: 700; font-size: 24px; cursor: pointer; height: auto;">PARTNER UP</div>
+                <div class="shard-container reveal-up d-3 tilt-card" style="background: transparent; border: 2px solid white; padding: 20px 60px; color: white; font-family: var(--font-tech); font-weight: 700; font-size: 24px; cursor: pointer; height: auto;">MEDIA KIT</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 20: END -->
+<section class="slide-section" id="s20">
+    <div class="tactical-grid"></div>
+    <div class="slide-container">
+        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; text-align: center;">
+            <h1 class="reveal-up d-1" style="font-size: 250px; letter-spacing: -10px; color: var(--neon-blue); text-shadow: 0 0 50px rgba(41, 121, 255, 0.5);">FA'AFETAI</h1>
+            <div class="reveal-up d-2" style="width: 200px; height: 6px; background: white; margin: 40px 0; transform: skewX(-30deg);"></div>
+            <div class="reveal-up d-3" style="font-family: var(--font-tech); letter-spacing: 5px; color: white; font-size: 20px;">WWW.TOASAMOA.COM</div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // 1. Initial Loader Logic
+    window.onload = () => {
+        setTimeout(() => {
+            const loader = document.getElementById('loader');
+            loader.style.opacity = '0';
+            setTimeout(() => loader.remove(), 500);
+        }, 2000);
+    };
+
+    // 2. Tactical Nav Rail Generator
+    const sections = document.querySelectorAll('.slide-section');
+    const navRail = document.getElementById('nav-rail');
+
+    sections.forEach((section, index) => {
+        const item = document.createElement('div');
+        item.classList.add('nav-item');
+        // Pad number with zero
+        const num = (index + 1).toString().padStart(2, '0');
+        item.innerHTML = `<span>${num}</span><div class="nav-dash"></div>`;
+        item.onclick = () => section.scrollIntoView({ behavior: 'smooth' });
+        navRail.appendChild(item);
+    });
+
+    const navItems = document.querySelectorAll('.nav-item');
+
+    // 3. Intersection Observer (Nav & Animations)
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active-slide');
+                
+                const index = Array.from(sections).indexOf(entry.target);
+                navItems.forEach(n => n.classList.remove('active'));
+                if(navItems[index]) navItems[index].classList.add('active');
+
+                entry.target.querySelectorAll('.counter').forEach(counter => animateCounter(counter));
+            } else {
+                entry.target.classList.remove('active-slide');
+            }
+        });
+    }, { threshold: 0.5 });
+
+    sections.forEach(s => observer.observe(s));
+
+    // 4. Counter Animation
+    function animateCounter(el) {
+        if (el.classList.contains('counted')) return;
+        const target = parseFloat(el.getAttribute('data-target'));
+        const suffix = el.getAttribute('data-suffix');
+        let current = 0;
+        const step = target / 40;
+        const timer = setInterval(() => {
+            current += step;
+            if (current >= target) {
+                current = target;
+                clearInterval(timer);
+                el.classList.add('counted');
+            }
+            let display = Number.isInteger(target) ? Math.floor(current) : current.toFixed(1);
+            el.innerText = display + suffix;
+        }, 20);
+    }
+
+    // 5. Cursor & Torch
+    const cursor = document.getElementById('cursor');
+    const torch = document.getElementById('torch');
+    
+    document.addEventListener('mousemove', (e) => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+        torch.style.left = e.clientX + 'px';
+        torch.style.top = e.clientY + 'px';
+    });
+    
+    document.querySelectorAll('a, .shard-container, .nav-item').forEach(el => {
+        el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+        el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+    });
+
+    // 6. 3D Tilt
+    const cards = document.querySelectorAll('.tilt-card');
+    cards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const rotateX = ((y - centerY) / centerY) * -15; // Increased range
+            const rotateY = ((x - centerX) / centerX) * 15;
+
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+        });
+
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = `perspective(1000px) rotateX(0) rotateY(0) scale(1)`;
+        });
+    });
+
+</script>
+
+</body>
+</html>
