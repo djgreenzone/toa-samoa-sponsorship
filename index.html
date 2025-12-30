@@ -37,7 +37,6 @@ body {
     margin: 0;
     font-family: var(--font-tech);
     color: white;
-    /* CRITICAL MOBILE FIX: Prevent horizontal scroll on body */
     overflow-x: hidden;
     width: 100vw;
     height: 100vh;
@@ -69,18 +68,17 @@ body {
 @keyframes loadProgress { 0% { width: 0%; } 100% { width: 100%; } }
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-/* GLOBAL TEXTURE (NOISE) - Z-Index 998 */
+/* GLOBAL TEXTURE */
 body::before {
     content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.07'/%3E%3C/svg%3E");
-    pointer-events: none; z-index: 998; mix-blend-mode: overlay;
+    pointer-events: none; z-index: 999; mix-blend-mode: overlay;
 }
 
-/* THE RESTORED GRID OVERLAY - Z-Index 9000 (Above Noise) */
+/* GLOBAL GRID OVERLAY */
 .global-grid-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    /* Crisp 8% white lines */
     background-image: 
         linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
@@ -88,9 +86,10 @@ body::before {
     pointer-events: none;
     z-index: 9000; 
     mix-blend-mode: screen; 
+    opacity: 0.3;
 }
 
-/* CURSOR & TORCH (Desktop Only) - Z-Index 9999 */
+/* CURSOR & TORCH (Desktop Only) */
 @media (min-width: 1025px) {
     #cursor {
         position: fixed; top: 0; left: 0; width: 20px; height: 20px; border: 2px solid var(--neon-cyan);
@@ -129,6 +128,18 @@ body::before {
     position: relative; z-index: 2;
     display: flex; flex-direction: column;
     padding: 0;
+}
+
+/* ANIMATED GRID */
+.tactical-grid {
+    position: absolute; inset: -50%; pointer-events: none;
+    background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 50px 50px; z-index: 0;
+    transform: perspective(500px) rotateX(20deg); animation: gridMove 20s linear infinite; opacity: 0.5;
+}
+@keyframes gridMove {
+    0% { transform: perspective(500px) rotateX(20deg) translateY(0); }
+    100% { transform: perspective(500px) rotateX(20deg) translateY(50px); }
 }
 
 /* TYPOGRAPHY */
@@ -325,26 +336,65 @@ h3 { font-size: clamp(24px, 5vw, 48px); letter-spacing: 1px; }
         min-height: auto;
     }
     
+    /* FIX: SLIDE 4 ROSTER MOBILE */
     #s4 .player-cutout {
-        max-height: 400px;
-        margin-bottom: -50px;
+        max-height: 60vh;
+        width: auto;
+        max-width: 100%;
+        margin-bottom: 0;
         position: relative;
         z-index: 1;
     }
-    #s4 .grid-2 > :first-child { 
-        min-height: 400px; 
+    #s4 .grid-2 {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        padding-top: 20px;
+    }
+    #s4 .grid-2 > :first-child {
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
     }
     
+    /* FIX: SLIDE 5 SIVA TAU */
+    #s5 h2 {
+        font-size: 15vw !important;
+        letter-spacing: 5px !important;
+        text-align: center;
+    }
+
+    /* FIX: SLIDE 12 FAN DAY MOBILE */
+    #s12 .grid-2 { display: flex; flex-direction: column; }
+    #s12 .grid-2 > div { width: 100%; }
+    #s12 .slide-container { padding: 40px 20px; }
+    
+    /* FIX: SLIDE 13 GLOBAL REACH MOBILE */
+    #s13 .slide-container > div {
+        flex-direction: column;
+    }
+    #s13 .slide-container > div > div:first-child { /* The Globe Container */
+        height: 300px;
+        margin-bottom: 40px;
+    }
+    #s13 .stat-mega { font-size: 60px !important; }
+    
+    /* FIX: SLIDE 15 COMMERCE VISION */
+    #s15 h2 { font-size: 12vw; }
+
+    /* FIX: SLIDE 16 REVENUE MOBILE */
+    #s16 .grid-3 {
+        display: flex;
+        flex-direction: column;
+        height: auto !important;
+    }
+    
+    /* Fix Slide 17 Grid */
     #s17 .grid-2 > div { 
         display: flex; 
         flex-direction: column; 
         gap: 20px; 
     }
-    
-    /* Fix Slide 12 Fan Day Mobile */
-    #s12 .grid-2 { display: flex; flex-direction: column; }
-    #s12 .grid-2 > div { width: 100%; }
-    #s12 .slide-container { padding: 40px 20px; }
 }
     </style>
 </head>
@@ -362,6 +412,7 @@ h3 { font-size: clamp(24px, 5vw, 48px); letter-spacing: 1px; }
 
 <!-- SLIDE 1: COVER -->
 <section class="slide-section" id="s1">
+    <div class="tactical-grid"></div>
     <div class="slide-container">
         <div style="position: absolute; top: 0; right: -100px; width: 70%; height: 100%; z-index: 0; transform: skewX(-10deg);">
             <img src="https://toasamoarl.com/wp-content/uploads/2025/12/ToaEntrance.png" style="width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); opacity: 0.05;">
@@ -390,6 +441,7 @@ h3 { font-size: clamp(24px, 5vw, 48px); letter-spacing: 1px; }
 
 <!-- SLIDE 2: LEGACY (FIXED IMAGE) -->
 <section class="slide-section" id="s2">
+    <div class="tactical-grid"></div>
     <div class="slide-container">
         <div class="grid-2">
             <div style="padding: 60px; display: flex; flex-direction: column; justify-content: center;">
@@ -410,6 +462,7 @@ h3 { font-size: clamp(24px, 5vw, 48px); letter-spacing: 1px; }
 
 <!-- SLIDE 3: IDENTITY -->
 <section class="slide-section" id="s3">
+    <div class="tactical-grid"></div>
     <div class="slide-container">
         <div style="padding: 60px 80px; display: flex; flex-direction: column; height: 100%; justify-content: center; align-items: center; text-align: center;">
             <h2 class="reveal-up d-1 glitch-hover" style="font-size: clamp(60px, 10vw, 160px);">THE 685<br><span class="text-glow">MOVEMENT</span></h2>
@@ -424,6 +477,7 @@ h3 { font-size: clamp(24px, 5vw, 48px); letter-spacing: 1px; }
 
 <!-- SLIDE 4: ROSTER / CAPTAIN SPOTLIGHT (FIXED) -->
 <section class="slide-section" id="s4">
+    <div class="tactical-grid"></div>
     <div class="slide-container">
         <div class="grid-2">
             <!-- Left: Player Image (Jarome Luai) -->
@@ -487,6 +541,7 @@ h3 { font-size: clamp(24px, 5vw, 48px); letter-spacing: 1px; }
 
 <!-- SLIDE 6: FAN CULTURE -->
 <section class="slide-section" id="s6">
+    <div class="tactical-grid"></div>
     <div class="slide-container">
         <div class="grid-2">
             <div style="padding: 60px; display: flex; flex-direction: column; justify-content: center;">
@@ -510,6 +565,7 @@ h3 { font-size: clamp(24px, 5vw, 48px); letter-spacing: 1px; }
 
 <!-- SLIDE 7: SECTION BREAK -->
 <section class="slide-section" id="s7">
+    <div class="tactical-grid"></div>
     <div class="slide-container">
         <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; background: repeating-linear-gradient(45deg, #0a0a0a, #0a0a0a 10px, #111 10px, #111 20px);">
             <div class="sub-tech reveal-up d-1" style="font-size: 24px; margin-bottom: 20px;">Section 02</div>
@@ -524,6 +580,7 @@ h3 { font-size: clamp(24px, 5vw, 48px); letter-spacing: 1px; }
 
 <!-- SLIDE 8: DIGITAL HEADQUARTERS (WEBSITE) -->
 <section class="slide-section" id="s8">
+    <div class="tactical-grid"></div>
     <div class="slide-container">
         <div style="padding: 60px 40px; height: 100%; display: flex; flex-direction: column;">
             <div style="text-align: center; margin-bottom: 40px;">
@@ -553,6 +610,7 @@ h3 { font-size: clamp(24px, 5vw, 48px); letter-spacing: 1px; }
 
 <!-- SLIDE 9: SOCIAL MEDIA (FB & IG) -->
 <section class="slide-section" id="s9">
+    <div class="tactical-grid"></div>
     <div class="slide-container">
         <div class="grid-2">
             <div style="padding: 0px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid #222;">
