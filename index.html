@@ -30,7 +30,7 @@
     --cyan-glow: 0 0 15px rgba(0, 212, 255, 0.6), 0 0 30px rgba(0, 212, 255, 0.2);
 }
 
-* { box-sizing: border-box; cursor: none; }
+* { box-sizing: border-box; }
 
 body {
     background-color: var(--void-black);
@@ -54,6 +54,7 @@ body {
     font-family: var(--font-tech); font-size: 20px; color: var(--neon-cyan);
     margin-bottom: 20px; letter-spacing: 5px; animation: blink 0.5s infinite;
     text-shadow: var(--cyan-glow);
+    text-align: center;
 }
 .loader-bar { width: 300px; height: 4px; background: #222; position: relative; overflow: hidden; }
 .loader-progress {
@@ -71,30 +72,26 @@ body::before {
     pointer-events: none; z-index: 999; mix-blend-mode: overlay;
 }
 
-/* CURSOR & TORCH */
-#cursor {
-    position: fixed; top: 0; left: 0; width: 20px; height: 20px; border: 2px solid var(--neon-cyan);
-    transform: translate(-50%, -50%) rotate(45deg); pointer-events: none; z-index: 9999;
-    transition: width 0.1s, height 0.1s, background 0.1s; mix-blend-mode: difference;
-    box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+/* CURSOR & TORCH (Desktop Only) */
+@media (min-width: 1025px) {
+    #cursor {
+        position: fixed; top: 0; left: 0; width: 20px; height: 20px; border: 2px solid var(--neon-cyan);
+        transform: translate(-50%, -50%) rotate(45deg); pointer-events: none; z-index: 9999;
+        transition: width 0.1s, height 0.1s, background 0.1s; mix-blend-mode: difference;
+        box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    }
+    #cursor.hovered { width: 60px; height: 60px; background: rgba(0, 212, 255, 0.2); border-color: white; }
+    #torch {
+        position: fixed; top: 0; left: 0; width: 1000px; height: 1000px;
+        background: radial-gradient(circle, rgba(0, 137, 255, 0.08) 0%, transparent 60%);
+        transform: translate(-50%, -50%); pointer-events: none; z-index: 1;
+    }
 }
-#cursor.hovered { width: 60px; height: 60px; background: rgba(0, 212, 255, 0.2); border-color: white; }
-#torch {
-    position: fixed; top: 0; left: 0; width: 1000px; height: 1000px;
-    background: radial-gradient(circle, rgba(0, 137, 255, 0.08) 0%, transparent 60%);
-    transform: translate(-50%, -50%); pointer-events: none; z-index: 1;
+@media (max-width: 1024px) {
+    #cursor, #torch { display: none; }
+    * { cursor: auto; }
 }
 
-/* SLIDE ARCHITECTURE */
-.slide-section {
-    width: 100vw; height: 100vh; scroll-snap-align: start;
-    display: flex; justify-content: center; align-items: center;
-    position: relative; border-bottom: 1px solid #111; overflow: hidden;
-}
-.slide-container {
-    width: 1280px; height: 720px; position: relative; z-index: 2;
-    display: flex; flex-direction: column;
-}
 
 /* ANIMATED GRID */
 .tactical-grid {
@@ -113,9 +110,6 @@ h1, h2, h3 {
     font-family: var(--font-heading); text-transform: uppercase; line-height: 0.85; margin: 0; color: white;
     font-style: italic; transform: skewX(-10deg);
 }
-h1 { font-size: 220px; letter-spacing: -5px; }
-h2 { font-size: 110px; letter-spacing: -2px; }
-h3 { font-size: 48px; letter-spacing: 1px; }
 
 /* Apply Glow to Brand Blue Headings */
 .text-glow {
@@ -175,10 +169,6 @@ h3 { font-size: 48px; letter-spacing: 1px; }
 .nav-item.active .nav-dash { background: var(--neon-blue); width: 40px; height: 4px; box-shadow: var(--blue-glow); }
 
 /* UTILS */
-.grid-2 { display: grid; grid-template-columns: 1fr 1.2fr; gap: 80px; height: 100%; }
-.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; height: 100%; }
-.hero-image { width: 100%; height: 100%; object-fit: cover; clip-path: polygon(20% 0, 100% 0, 100% 100%, 0% 100%); filter: grayscale(100%) contrast(1.2) brightness(0.9); transition: 0.5s; }
-.hero-image:hover { filter: grayscale(0%); clip-path: polygon(10% 0, 100% 0, 100% 100%, 10% 100%); }
 .glitch-hover { position: relative; transition: color 0.3s; }
 .glitch-hover:hover { color: var(--neon-cyan); text-shadow: var(--cyan-glow); }
 
@@ -198,6 +188,119 @@ h3 { font-size: 48px; letter-spacing: 1px; }
     filter: grayscale(0%) contrast(1.0); /* Full color on hover */
 }
 
+/* =========================================
+   DESKTOP STYLES (Default for > 1024px)
+   ========================================= */
+@media (min-width: 1025px) {
+    .slide-section { height: 100vh; }
+    .slide-container { width: 1280px; height: 720px; }
+    
+    h1 { font-size: 220px; letter-spacing: -5px; }
+    h2 { font-size: 110px; letter-spacing: -2px; }
+    h3 { font-size: 48px; letter-spacing: 1px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1.2fr; gap: 80px; height: 100%; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; height: 100%; }
+    
+    .hero-image { width: 100%; height: 100%; object-fit: cover; clip-path: polygon(20% 0, 100% 0, 100% 100%, 0% 100%); filter: grayscale(100%) contrast(1.2) brightness(0.9); transition: 0.5s; }
+    .hero-image:hover { filter: grayscale(0%); clip-path: polygon(10% 0, 100% 0, 100% 100%, 10% 100%); }
+    
+    #s1 .slide-container > div:first-child { /* Cover BG */
+        width: 70% !important; transform: skewX(-10deg);
+    }
+}
+
+/* =========================================
+   MOBILE / TABLET OVERRIDES (<= 1024px)
+   ========================================= */
+@media (max-width: 1024px) {
+    body {
+        overflow-y: scroll; /* Allow natural scroll */
+        scroll-snap-type: none; /* Disable snap on mobile for easier reading */
+    }
+
+    #nav-rail, .tactical-grid { display: none; }
+
+    .slide-section {
+        height: auto; /* Fluid height */
+        min-height: 100vh;
+        padding: 40px 0;
+        border-bottom: 2px solid #222;
+    }
+
+    .slide-container {
+        width: 90%;
+        height: auto;
+        padding: 0;
+    }
+
+    /* Stack Grids */
+    .grid-2, .grid-3 {
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+        height: auto;
+    }
+    
+    /* Reorder grids so images often come first */
+    .grid-2 > :first-child { order: 1; }
+    .grid-2 > :last-child { order: 2; }
+    /* Fix specific slides where image is 2nd div but needs to be top */
+    #s2 .grid-2 > :nth-child(2),
+    #s6 .grid-2 > :nth-child(2) { order: 1; margin-bottom: 20px;}
+    #s2 .grid-2 > :nth-child(1),
+    #s6 .grid-2 > :nth-child(1) { order: 2; }
+
+
+    /* Typography Scaling */
+    h1 { font-size: 20vw; line-height: 0.8; }
+    h2 { font-size: 14vw; line-height: 0.9; }
+    h3 { font-size: 8vw; }
+    .stat-mega { font-size: 20vw !important; }
+
+    /* Adjust Cards */
+    .shard-container {
+        height: auto;
+        padding: 30px 20px;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%); /* Remove side clip for mobile width */
+        border-left: 4px solid var(--neon-red);
+    }
+    
+    /* Adjust Images */
+    .hero-image {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        clip-path: none;
+        margin-bottom: 20px;
+    }
+
+    /* Slide 1 Cover Adjustments */
+    #s1 .slide-container > div:first-child { /* BG Image */
+        width: 100% !important;
+        right: 0 !important;
+        transform: skewX(0deg) !important;
+        opacity: 0.4;
+    }
+    #s1 .grid-2 {
+        display: flex; flex-direction: column-reverse; /* Put Text on top of logo */
+    }
+    #s1 .reveal-image {
+        width: 60% !important; 
+        margin-bottom: 40px;
+    }
+    
+    /* Slide 4 Roster Fix */
+    #s4 .player-cutout {
+        max-height: 50vh;
+        object-position: top center;
+    }
+    
+    /* Slide 17 Grid */
+    #s17 .grid-2 { display: flex; flex-direction: column; }
+    #s17 .grid-2 > div { display: grid; grid-template-columns: 1fr; gap: 20px; }
+}
+
     </style>
 </head>
 <body>
@@ -215,32 +318,29 @@ h3 { font-size: 48px; letter-spacing: 1px; }
 <section class="slide-section" id="s1">
     <div class="tactical-grid"></div>
     <div class="slide-container">
+        <!-- Background Image -->
         <div style="position: absolute; top: 0; right: -100px; width: 70%; height: 100%; z-index: 0; transform: skewX(-10deg);">
             <img src="https://toasamoarl.com/wp-content/uploads/2025/12/ToaEntrance.png" style="width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); opacity: 0.05;">
-            <!-- Updated overlay with new Blue -->
             <div style="position: absolute; inset: 0; background: linear-gradient(45deg, rgba(0, 137, 255, 0.4), rgba(255,0,60,0.2)); mix-blend-mode: overlay;"></div>
         </div>
         
-        <!-- Grid layout for 2 columns -->
-        <div style="position: relative; z-index: 2; height: 100%; display: grid; grid-template-columns: 1fr 1fr;">
-            
-            <!-- Column 1: Text (Left) -->
+        <!-- Grid layout -->
+        <div style="position: relative; z-index: 2; height: 100%;" class="grid-2">
+            <!-- Column 1: Text -->
             <div style="display: flex; flex-direction: column; justify-content: center; padding-left: 60px;">
                 <div class="sub-tech reveal-up d-1">Toa Samoa // 2026 // ROAD TO RLWC</div>
                 <h1 class="reveal-up d-2">TOA<br><span style="color: var(--neon-red); text-shadow: 0 0 40px var(--neon-red);">SAMOA</span></h1>
                 <div style="width: 100px; height: 8px; background: var(--neon-cyan); transform: skewX(-30deg); box-shadow: var(--cyan-glow);" class="reveal-up d-3"></div>
             </div>
-
-            <!-- Column 2: Logo (Right, Centered) -->
+            <!-- Column 2: Logo -->
             <div style="display: flex; align-items: center; justify-content: center;">
                 <img src="https://toasamoarl.com/wp-content/uploads/2025/09/cropped-RugbyLeagueSamoaSiteIcon_512x512.png" class="reveal-image d-4" style="width: 350px; filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.3));" alt="Toa Samoa Logo">
             </div>
-
         </div>
     </div>
 </section>
 
-<!-- SLIDE 2: LEGACY (FIXED IMAGE) -->
+<!-- SLIDE 2: LEGACY -->
 <section class="slide-section" id="s2">
     <div class="tactical-grid"></div>
     <div class="slide-container">
@@ -254,7 +354,6 @@ h3 { font-size: 48px; letter-spacing: 1px; }
                 </div>
             </div>
             <div style="position: relative;">
-                <!-- Updated class to 'reveal-image' to prevent warping -->
                 <img src="https://toasamoarl.com/wp-content/uploads/2025/12/ToaSamoaTry.jpg" class="hero-image reveal-image d-2" alt="Legacy">
             </div>
         </div>
@@ -276,50 +375,32 @@ h3 { font-size: 48px; letter-spacing: 1px; }
     </div>
 </section>
 
-<!-- SLIDE 4: ROSTER / CAPTAIN SPOTLIGHT (FIXED) -->
+<!-- SLIDE 4: ROSTER -->
 <section class="slide-section" id="s4">
     <div class="tactical-grid"></div>
     <div class="slide-container">
         <div class="grid-2">
-            <!-- Left: Player Image (Jarome Luai) -->
+            <!-- Left: Player Image -->
             <div style="position: relative; height: 100%;">
                 <div style="position: absolute; top: 20px; left: 20px; z-index: 10;">
                     <div class="sub-tech" style="background: var(--neon-red); color: black; border: none;">CO-CAPTAIN</div>
                 </div>
-                
-                <!-- UPDATED IMAGE: No skew, contain mode, bottom alignment -->
                 <img src="https://toasamoarl.com/wp-content/uploads/2025/12/Jarom_HK.jpg" class="player-cutout reveal-image d-2" alt="Jarome Luai">
-                
                 <div style="position: absolute; bottom: 40px; left: -20px; z-index: 10;">
                     <h2 class="reveal-up d-3" style="font-size: 80px; text-shadow: 2px 2px 0px black; margin: 0; line-height: 0.8;">JAROME<br><span style="color: var(--neon-cyan); text-shadow: var(--cyan-glow);">LUAI</span></h2>
                 </div>
             </div>
-
-            <!-- Right: Stats & Bio -->
+            <!-- Right: Stats -->
             <div style="padding: 60px; display: flex; flex-direction: column; justify-content: center;">
                 <div class="sub-tech reveal-up d-1">02 // Roster</div>
                 <h2 class="reveal-up d-2" style="font-size: 80px;">ELITE <span class="text-glow">PLAYER ROSTER</span></h2>
-                
                 <div class="shard-container reveal-up d-3 tilt-card" style="margin-top: 30px; height: auto; border-left: 6px solid var(--neon-blue);">
                     <p style="font-size: 24px; color: white; margin: 0; transform: skewX(-10deg); font-family: var(--font-heading);">"REPRESENTING OUR PEOPLE IS THE HIGHEST HONOUR."</p>
-                    
                     <div style="margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        <div>
-                            <div style="font-size: 14px; color: #888;">CAPS</div>
-                            <div style="font-size: 40px; font-family: var(--font-heading); color: var(--neon-cyan);">13</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 14px; color: #888;">POSITION</div>
-                            <div style="font-size: 40px; font-family: var(--font-heading); color: white;">5/8</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 14px; color: #888;">CLUB</div>
-                            <div style="font-size: 40px; font-family: var(--font-heading); color: white;">WESTS TIGERS</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 14px; color: #888;">STATUS</div>
-                            <div style="font-size: 40px; font-family: var(--font-heading); color: var(--neon-red);">ELITE</div>
-                        </div>
+                        <div><div style="font-size: 14px; color: #888;">CAPS</div><div style="font-size: 40px; font-family: var(--font-heading); color: var(--neon-cyan);">13</div></div>
+                        <div><div style="font-size: 14px; color: #888;">POSITION</div><div style="font-size: 40px; font-family: var(--font-heading); color: white;">5/8</div></div>
+                        <div><div style="font-size: 14px; color: #888;">CLUB</div><div style="font-size: 40px; font-family: var(--font-heading); color: white;">WESTS TIGERS</div></div>
+                        <div><div style="font-size: 14px; color: #888;">STATUS</div><div style="font-size: 40px; font-family: var(--font-heading); color: var(--neon-red);">ELITE</div></div>
                     </div>
                 </div>
             </div>
@@ -335,7 +416,7 @@ h3 { font-size: 48px; letter-spacing: 1px; }
             <div style="position: absolute; inset: 0; background: linear-gradient(to top, var(--void-black), rgba(0, 137, 255, 0.15), var(--void-black)); mix-blend-mode: overlay;"></div>
         </div>
         <div style="position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; height: 100%;">
-            <h2 class="reveal-up d-1" style="font-size: 250px; letter-spacing: 20px; color: transparent; -webkit-text-stroke: 4px white; transform: skewX(-20deg); text-outer-glow: var(--cyan-glow);">SIVA TAU</h2>
+            <h2 class="reveal-up d-1" style="font-size: 250px; letter-spacing: 20px; color: transparent; -webkit-text-stroke: 4px white; transform: skewX(-20deg); text-shadow: var(--cyan-glow);">SIVA TAU</h2>
         </div>
     </div>
 </section>
@@ -350,6 +431,11 @@ h3 { font-size: 48px; letter-spacing: 1px; }
                 <h2 class="reveal-up d-2">THE<br><span class="text-glow">BLUE</span> <span style="color: var(--neon-white);">ARMY</span></h2>
                 <div class="shard-container reveal-up d-3 tilt-card" style="margin-top: 40px; height: auto;">
                     <p style="font-size: 22px; color: white; margin: 0;">A global phenomenon.</p>
+                     <ul style="transform: skewX(-10deg); margin-top: 20px;">
+                        <li style="margin-bottom: 15px;"><strong style="color:var(--neon-blue)">APIA:</strong> National gridlock for 24 hours.</li>
+                        <li style="margin-bottom: 15px;"><strong style="color:var(--neon-red)">SOUTH AUCKLAND:</strong> The diaspora heartland.</li>
+                        <li style="margin-bottom: 15px;"><strong style="color:white">WESTERN SYDNEY:</strong> 50,000+ street parades.</li>
+                    </ul>
                 </div>
             </div>
             <div style="position: relative;">
@@ -363,10 +449,10 @@ h3 { font-size: 48px; letter-spacing: 1px; }
 <section class="slide-section" id="s7">
     <div class="tactical-grid"></div>
     <div class="slide-container">
-        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; background: repeating-linear-gradient(0deg, #0a0a0a, #0a0a0a 10px, #111 10px, #111 20px);">
-            <div class="sub-tech reveal-up d-1" style="font-size: 24px; margin-top: 10px; margin-bottom: 40px;">Section 02</div>
+        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; background: repeating-linear-gradient(45deg, #0a0a0a, #0a0a0a 10px, #111 10px, #111 20px);">
+            <div class="sub-tech reveal-up d-1" style="font-size: 24px; margin-bottom: 20px;">Section 02</div>
             <h2 class="reveal-up d-2" style="font-size: 140px; color: var(--neon-blue); text-shadow: var(--blue-glow); text-align: center; line-height: 0.85;">INSIDE<br><span style="color: white;">TOA SAMOA</span></h2>
-            <div style="width: 150px; height: 6px; background: var(--neon-cyan); margin-top: 10px; transform: skewX(-30deg); box-shadow: var(--cyan-glow);" class="reveal-up d-3"></div>
+            <div style="width: 150px; height: 6px; background: var(--neon-cyan); margin-top: 40px; transform: skewX(-30deg); box-shadow: var(--cyan-glow);" class="reveal-up d-3"></div>
             <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                 <img src="https://toasamoarl.com/wp-content/uploads/2025/09/RugbyLeagueSamoaSiteIcon_512x512.png" alt="Rugby League Samoa Icon" style="width: 150px; height: 150px;" class="reveal-image d-4">
             </div>
@@ -374,13 +460,13 @@ h3 { font-size: 48px; letter-spacing: 1px; }
     </div>
 </section>
 
-<!-- SLIDE 8: DIGITAL HEADQUARTERS (WEBSITE) -->
+<!-- SLIDE 8: DIGITAL HEADQUARTERS -->
 <section class="slide-section" id="s8">
     <div class="tactical-grid"></div>
     <div class="slide-container">
         <div style="padding: 60px 80px; height: 100%; display: flex; flex-direction: column;">
             <div style="text-align: center; margin-bottom: 40px;">
-                <h2 class="reveal-up d-1">DIGITAL <span style="color: var(--neon-cyan); text-shadow: var(--cyan-glow);">HQ</span></h2>
+                <h2 class="reveal-up d-1">DIGITAL <span style="color: var(--neon-cyan); text-shadow: var(--cyan-glow);">HQ</span> [WEBSITE]</h2>
             </div>
             <div class="grid-3" style="align-items: center;">
                 <div class="shard-container reveal-up d-2 tilt-card" style="text-align: center; justify-content: center; height: 300px;">
@@ -393,46 +479,40 @@ h3 { font-size: 48px; letter-spacing: 1px; }
                     <div style="color: white; font-size: 28px; font-weight: 700; transform: skewX(-10deg);">INTERACTIONS</div>
                     <div style="font-size: 16px; color: #888;">Event Count / Engagement</div>
                 </div>
-                <!-- Updated Card: EMAIL SUBSCRIBERS -->
                 <div class="shard-container reveal-up d-4 tilt-card" style="text-align: center; justify-content: center; height: 300px; border-left-color: white;">
                     <div class="stat-mega counter" data-target="20" data-suffix="K" style="font-size: 120px; color:var(--acid-yellow); text-shadow: 0 0 20px rgba(204, 255, 0, 0.4);">0</div>
                     <div style="color: white; font-size: 24px; font-weight: 700; transform: skewX(-10deg);">EMAIL SUBSCRIBERS</div>
                     <div style="font-size: 16px; color: #666;">Owned Audience Database</div>
                 </div>
             </div>
-        <div style="padding: 60px 80px; height: 100%; display: flex; flex-direction: column;">
-            <div style="text-align: center; margin-bottom: 40px;">
-                <h2 class="reveal-up d-1"><span style="color: white(--neon-cyan); text-shadow: var(--cyan-glow);">[WEBSITE]</h2>
-            </div>
+        </div>
     </div>
 </section>
 
-<!-- SLIDE 9: SOCIAL MEDIA (FB & IG) -->
+<!-- SLIDE 9: SOCIAL MEDIA -->
 <section class="slide-section" id="s9">
     <div class="tactical-grid"></div>
     <div class="slide-container">
         <div class="grid-2">
             <div style="padding: 0px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid #222;">
                 <div class="sub-tech reveal-up d-1">04 // Socials</div>
-                <!-- Inserted Image -->
                 <img src="https://toasamoarl.com/wp-content/uploads/2025/12/Toa-Samoa-Kinetic-edits_iphone.png" class="reveal-image d-3" style="width: 100%; margin-top: 0px; filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.2));" alt="Social Media Mockup">
-                
                 <div class="shard-container reveal-up d-4" style="margin-top: 30px; border: none; background: transparent; padding: 0;">
                     <p style="font-size: 20px; color: white; transform: skewX(-10deg);">"Massive Viral Reach on Instagram. Loyal Community on Facebook."</p>
                 </div>
             </div>
             <div style="padding: 60px; display: flex; flex-direction: column; justify-content: center;">
-                <h2 class="reveal-up d-2" style="font-size: 90px;">INSIDE<br>THE SOCIALS</h2>                
-                <h3 class="text-glow" style="margin-bottom: 20px;">FACEBOOK</h3>
+                <h2 class="reveal-up d-2" style="font-size: 90px;">INSIDE<br>THE SOCIALS</h2> 
+                <h3 class="text-glow" style="margin-bottom: 20px;">FACEBOOK (Growth +16%)</h3>
                 <div style="margin-bottom: 30px;">
-                    <div style="display:flex; justify-content:space-between; font-weight:500; font-size: 24px; transform: skewX(-10deg);"><span>FOLLOWERS</span><span class="text-glow">229K</span></div>
+                    <div style="display:flex; justify-content:space-between; font-weight:700; font-size: 24px; transform: skewX(-10deg);"><span>FOLLOWERS</span><span class="text-glow">229K</span></div>
                     <div style="height:12px; background:#222; margin-top:5px; transform: skewX(-20deg);"><div class="data-bar-fill fill-trigger" style="--target-width: 90%;"></div></div>
                 </div>
                 <div style="margin-bottom: 30px;">
-                    <div style="display:flex; justify-content:space-between; font-weight:500; font-size: 24px; transform: skewX(-10deg);"><span>VIEWS</span><span class="text-glow">24M</span></div>
+                    <div style="display:flex; justify-content:space-between; font-weight:700; font-size: 24px; transform: skewX(-10deg);"><span>VIEWS</span><span class="text-glow">24M</span></div>
                     <div style="height:12px; background:#222; margin-top:5px; transform: skewX(-20deg);"><div class="data-bar-fill fill-trigger" style="--target-width: 40%;"></div></div>
                 </div>
-                <h3 style="color: var(--neon-red); margin-bottom: 20px; margin-top: 40px; text-shadow: 0 0 10px rgba(255, 0, 60, 0.6);">INSTAGRAM</h3>
+                <h3 style="color: var(--neon-red); margin-bottom: 20px; margin-top: 40px; text-shadow: 0 0 10px rgba(255, 0, 60, 0.6);">INSTAGRAM (Viral Reach)</h3>
                 <div style="margin-bottom: 30px;">
                     <div style="display:flex; justify-content:space-between; font-weight:700; font-size: 24px; transform: skewX(-10deg);"><span>FOLLOWERS</span><span style="color:var(--neon-red);">127K</span></div>
                     <div style="height:12px; background:#222; margin-top:5px; transform: skewX(-20deg);"><div class="data-bar-fill fill-trigger" style="--target-width: 50%; background:var(--neon-red); box-shadow: 0 0 10px rgba(255,0,60,0.5);"></div></div>
@@ -733,13 +813,7 @@ h3 { font-size: 48px; letter-spacing: 1px; }
 </section>
 
 <!-- SLIDE 19: CTA -->
-<section class="slide-section" id="s19" style="position: relative;">
-    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('https://toasamoarl.com/wp-content/uploads/2025/12/80058807_Samoa_War_Cry_251109_MK_040_202511911225-scaled.jpg') no-repeat center center / cover; opacity: 0.25; z-index: -2; filter: grayscale(100%);"></div>
-    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: -1; background: 
-        linear-gradient(to bottom, rgba(0,0,0,1) 0%, transparent 20%),
-        linear-gradient(to top, rgba(0,0,0,1) 0%, transparent 75%),
-        linear-gradient(to right, rgba(0,0,0,1) 0%, transparent 30%),
-        linear-gradient(to left, rgba(0,0,0,1) 0%, transparent 30%);"></div>
+<section class="slide-section" id="s19">
     <div class="slide-container">
         <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(to top, var(--neon-blue) 0%, transparent 100%); opacity: 0.1;"></div>
         <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; text-align: center; z-index: 2;">
